@@ -81,8 +81,9 @@ function loadJson(doc, type, json) {
 }
 
 function style(feature) {
+  console.log(feature.properties[year][mapVariable][valueType]/feature.properties[year]['ELECTORS'][valueType])
     return {
-        fillColor: getColor(feature.properties[year][mapVariable][valueType]),
+        fillColor: getColor(feature.properties[year][mapVariable][valueType]/feature.properties[year]['ELECTORS'][valueType]),
         weight: 2,
         opacity: 1,
         color: 'white',
@@ -92,13 +93,13 @@ function style(feature) {
 }
 
 function getColor(d) {
-    return d > 50000 ? '#800026' :
-           d > 45000  ? '#BD0026' :
-           d > 40000  ? '#E31A1C' :
-           d > 35000  ? '#FC4E2A' :
-           d > 30000   ? '#FD8D3C' :
-           d > 20000   ? '#FEB24C' :
-           d > 10000   ? '#FED976' :
+    return d > 0.5 ? '#800026' :
+           d > 0.475  ? '#BD0026' :
+           d > 0.45  ? '#E31A1C' :
+           d > 0.425  ? '#FC4E2A' :
+           d > 0.4   ? '#FD8D3C' :
+           d > 0.375  ? '#FEB24C' :
+           d > 0.35   ? '#FED976' :
                       '#FFEDA0';
 }
 
