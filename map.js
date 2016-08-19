@@ -1,18 +1,17 @@
-mapboxgl.accessToken = 'pk.eyJ1Ijoic29uYWxyIiwiYSI6ImI3ZGNmNTI1Mzc1NzFlYTExMGJkZTVlZDYxYWY4NzJmIn0.wxeViIZtMPq2IPoD9mB5qQ';
+L.mapbox.accessToken = 'pk.eyJ1Ijoic29uYWxyIiwiYSI6ImI3ZGNmNTI1Mzc1NzFlYTExMGJkZTVlZDYxYWY4NzJmIn0.wxeViIZtMPq2IPoD9mB5qQ';
+var COLORS = [ '#deebf7', '#c6dbef', '#9ecae1', '#6baed6', '#4292c6', '#2171b5', '#084594' ],
+  BREAKS = [ 0, 100, 200, 300, 400, 500, 600 ]
+
+var year = 2011
+var mapVariable = "VOTER_TURNOUT"
+var valueType = "value"
+
+var map = L.mapbox.map('map', 'mapbox.streets', {zoomControl: false})
+    
 
 
-var map = new mapboxgl.Map( {
-  container: 'map',
-  style: 'mapbox://styles/mapbox/light-v9',
-  center: [ -79.801, 43.559 ],
-  zoom: 10
-} );
 
-var geocoder = new mapboxgl.Geocoder({
-    container: 'geocoder-container' // Optional. Specify a unique container for the control to be added to.
-});
-
-function loadCsv(doc, type) {
+function loadCsv(doc, type, json) {
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == 4 && xhttp.status == 200) 
@@ -20,40 +19,97 @@ function loadCsv(doc, type) {
             dat = xhttp.responseText;
             dat = dat.split(/(?:\r\n|\r|\n)/g);
             
+            for(j = 0; j < json.features.length; j++)
+            {
+              json.features[j].properties['2007']={};
+              json.features[j].properties['2011']={};
+              json.features[j].properties['2014']={};
+            }
+           
             for(i = 0; i < dat.length; i++)
             {
               dat[i] = dat[i].split(",");
-              
               switch(type)
               {
                 case 'ed':
                   dat[i] = {edid: dat[i][1], year: dat[i][2], variable : dat[i][3], party : dat[i][4], value : dat[i][5] };
+                  
+                  for(j = 0; j < json.features.length; j++)
+                  {
+                    
+                    if(parseInt(dat[i].edid) == json.features[j].properties['ED_ID'])
+                    {
+                      json.features[j].properties[dat[i].year][dat[i].variable] = {party : dat[i].party, value : dat[i].value} ;
+                    }
+                  }
+
                   break;
+              
+                  
+                
                 case 'pd':
                   dat[i] = {edid: dat[i][1], pdid: dat[i][2], year: dat[i][3], variable : dat[i][4], party : dat[i][5], value : dat[i][6] };
                   break;
               }
             }
             
-            console.dir(dat);
+            
+            console.dir(json);
+            
+            L.geoJson(json,{
+              style: style
+            }).addTo(map)
+            
+            $("#sidebar").toggle(500)
+            $("#sidebar-toggle").toggle(500)
         }
     };
     xhttp.open("GET", doc, true);
     xhttp.send();
 }
 
-////
-ed2014 = loadCsv('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ed2014total.csv', 'ed');
-ed2014 = loadCsv('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/pd2014total.csv', 'pd');
+function loadJson(doc, type, json) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+        if (xhttp.readyState == 4 && xhttp.status == 200) 
+        {
+          loadCsv(doc, type, JSON.parse(xhttp.responseText))
+        }
+    }
+    xhttp.open("GET", json, true);
+    xhttp.send();
+}
 
-map.addControl(geocoder);
+function style(feature) {
+    return {
+        fillColor: getColor(feature.properties[year][mapVariable][valueType]),
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.7
+    };
+}
+
+function getColor(d) {
+    return d > 50000 ? '#800026' :
+           d > 45000  ? '#BD0026' :
+           d > 40000  ? '#E31A1C' :
+           d > 35000  ? '#FC4E2A' :
+           d > 30000   ? '#FD8D3C' :
+           d > 20000   ? '#FEB24C' :
+           d > 10000   ? '#FED976' :
+                      '#FFEDA0';
+}
+
+////
+
+
 
 // when map loads, 
 map.on('load', function() {
+    map.setView([50,-90], 5)
     
-    $("#sidebar").toggle(500)
-    $("#sidebar-toggle").toggle(500)
-    $("#geocoder-container").fadeIn(750)
     document.getElementById("sidebar-toggle").onclick = function()
     {
       
@@ -72,30 +128,8 @@ map.on('load', function() {
                                                         "<option value = 'all'>All Parties </option>"+
                                                       "</select>"
     }
+    loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
+    
 
-    // add an empty point feature
-    map.addSource('single-point', {
-        "type": "geojson",
-        "data": {
-            "type": "FeatureCollection",
-            "features": []
-        }
-    });
 
-    // 
-    map.addLayer({
-        "id": "point",
-        "source": "single-point",
-        "type": "circle",
-        "paint": {
-            "circle-radius": 10,
-            "circle-color": "#007cbf"
-        }
-    });
-
-    // Listen for the `geocoder.input` event that is triggered when a user
-    // makes a selection and add a symbol that matches the result.
-    geocoder.on('result', function(ev) {
-        map.getSource('single-point').setData(ev.result.geometry);
-    });
 });

@@ -8,6 +8,7 @@ body { margin:0; padding:0; }
   height: 100%;
   z-index: 99;
   display:none;
+  background: rgba(245,245,245,0.9);
 }
 
 #sidebar-toggle{
@@ -17,16 +18,5 @@ body { margin:0; padding:0; }
   display:none;
 }
 
-#geocoder-container {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    margin-top: 10px;
-    display:none;
-}
 
-#geocoder-container > div {
-    min-width:50%;
-    margin-left:25%;
-}
 
