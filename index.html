@@ -24,19 +24,22 @@
     
     <div class = "well" id = "sidebar">
       <h3 align = "center">Ontario Elections</h3>
-      <p>Hi There!<br>This is a draft of the #freetheelectorate map!<br>Right now, the interface doesn't do anything :S</p>
-      <p>The current data you see is for Voter turnout, as a percent of all eligible electors, in 2011. <br>Interestingly, the range of turnouts is from ~30% to about ~60%</p>
+      
       <div align = "center">
-        <button class = "btn btn-primary" id = "Turnout">Turnout</button>
-        <button class = "btn btn-primary" id = "Results">Results</button>
+        <button class = "btn btn-primary" id = "Turnout">Electors</button>
+        <button class = "btn btn-primary" id = "Results">Electees</button>
         <hr>
-        <div id = "Options" align = "left"></div>
+        <div id = "Options" align = "left">
+          <input type="radio" name="Turnout" value="VOTER_TURNOUT" checked> Percent Turnout<br>
+          <input type="radio" name="Turnout" value="REJECTED"> Percent Rejected<br>
+          <input type="radio" name="Turnout" value="UNMARKED"> Percent Unmarked
+        </div>
         
       </div>    
       <hr>
       <input type="radio" name="year" value="2007"> 2007<br>
-      <input type="radio" name="year" value="2011"> 2011<br>
-      <input type="radio" name="year" value="2014" checked> 2014
+      <input type="radio" name="year" value="2011" checked> 2011<br>
+      <input type="radio" name="year" value="2014"> 2014
     </div>
     <span class = "glyphicon glyphicon-arrow-left" id = "sidebar-toggle"></span>
     
