@@ -128,7 +128,7 @@ function getColor(c, div, minVal, maxVal) {
   {
     case 'VOTER_TURNOUT':
     case 'REJECTED':
-    case 'uNMARKED':
+    case 'UNMARKED':
       d = c / div;
       var diff = maxVal - minVal;
       return d > minVal+ (7*diff/8) ? '#800026' :
@@ -208,7 +208,7 @@ map.on('load', function() {
     {
       document.getElementById("Options").innerHTML = '<input type="radio" name="Turnout" value="VOTER_TURNOUT"> Percent Turnout<br>'+
                                                       '<input type="radio" name="Turnout" value="REJECTED"> Percent Rejected<br>'+
-                                                      '<input type="radio" name="Turnout" value="UNMARKED"> Percent Unmarked+<br><br>'
+                                                      '<input type="radio" name="Turnout" value="UNMARKED"> Percent Unmarked<br><br>'
 
     }
 
@@ -240,6 +240,7 @@ map.on('load', function() {
     }
     
     loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
-
+    loadCsv()
 });
+
 
