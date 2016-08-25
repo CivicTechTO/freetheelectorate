@@ -119,7 +119,7 @@ function style(feature) {
         weight: 1,
         opacity: 1,
         color: 'white',
-        fillOpacity: 0.7
+        fillOpacity: 0.6
     };
 }
 
@@ -183,12 +183,15 @@ function getColor(c, div, minVal, maxVal) {
 
 function onEachFeature(feature, layer) {
   
-  layer.bindPopup("value: " + feature.properties[year][mapVariable][valueType]+ "<br>min: " + minVal+ "<br>max: " + maxVal)
-    //layer.on({
-        //mouseover: highlightFeature,
-        //mouseout: resetHighlight,
-        //click: 
-   // });
+  layer.bindPopup("<h5>" + feature.properties.ENGLISH_NA + " / "+feature.properties.FRENCH_NAM + "</h5>"
+                  + "<b>Number of Electors in "+year+": </b>" +  feature.properties[year]["ELECTORS"]["value"]+"<br>"
+                  + "<b>Voter Turnout in "+year+": </b>" + feature.properties[year]["VOTER_TURNOUT"]["value"] + " (" + Math.round(feature.properties[year]["VOTER_TURNOUT"]["value"]/feature.properties[year]["ELECTORS"]["value"]*100) + "%)<br>"
+                  + "<b>Winning Party in "+year+": </b>" + feature.properties[year]["WINNER"]["party"]
+                  )
+    layer.on({
+        mouseover: function(){layer.setStyle({fillOpacity: 0.9, weight:2})},
+        mouseout: function(){layer.setStyle({fillOpacity: 0.6, weight:1})},
+    });
 }
 
 ////
@@ -222,6 +225,8 @@ map.on('load', function() {
       {
         mapVariable = document.getElementById("party-picker").value
         valueType = 'party';
+        document.getElementById("legend-title").innerHTML = "Winning Party";
+        document.getElementById("legend-content").innerHTML = ""
         console.log(mapVariable)
         chloropleth.clearLayers()
         loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
@@ -234,6 +239,8 @@ map.on('load', function() {
       {
         chloropleth.clearLayers()
         mapVariable = document.querySelector('input[type="radio"]:checked').value;
+        document.getElementById("legend-title").innerHTML = mapVariable;
+        document.getElementById("legend-content").innerHTML = 'More<br><i style=" background-color:#800026"></i><br><br><i style="height:50px ;width:50px;border-color: black; border-width: 1px;border-style: solid; background-color:#FED976"></i><br>Less';
         valueType = 'value';
         loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
       }

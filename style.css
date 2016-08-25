@@ -18,5 +18,27 @@ body { margin:0; padding:0; }
   display:none;
 }
 
+#legend {
 
+    /* fixed within viewport */
+    position: fixed;
+
+    /* set position */
+    top: 20px;
+    right: 30px;
+
+    background: rgba(245,245,245,0.9);
+    z-index: 99;
+}
+
+#legend-content i {
+        float: left;
+        margin-right: 8px;
+        opacity: 0.7;
+        height:50px ;
+        width:50px;
+        border-color: black;
+        border-width: 1px;
+        border-style: solid;
+    }
 
