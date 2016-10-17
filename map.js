@@ -1,8 +1,9 @@
 L.mapbox.accessToken = 'pk.eyJ1Ijoic29uYWxyIiwiYSI6ImI3ZGNmNTI1Mzc1NzFlYTExMGJkZTVlZDYxYWY4NzJmIn0.wxeViIZtMPq2IPoD9mB5qQ';
 
-var year = 2011;
+var year = "2011";
 var mapVariable = "VOTER_TURNOUT";
 var valueType = "value";
+var edToView = ""
 
 
 var map = L.mapbox.map('map', 'mapbox.streets', {zoomControl: false})
@@ -19,21 +20,25 @@ function loadCsv(doc, type, json) {
             dat = xhttp.responseText;
             dat = dat.split(/(?:\r\n|\r|\n)/g);
             
+            // Make a container for each years' data
             for(j = 0; j < json.features.length; j++)
             {
               json.features[j].properties['2007']={};
               json.features[j].properties['2011']={};
               json.features[j].properties['2014']={};
             }
-           
+            
+            // For each EDID, put the data into the right object
             for(i = 0; i < dat.length; i++)
             {
               dat[i] = dat[i].split(",");
+              
               switch(type)
               {
                 case 'ed':
                   dat[i] = {edid: dat[i][1], year: dat[i][2], variable : dat[i][3], party : dat[i][4], value : dat[i][5] };
                  
+                  // join record to ED
                   for(j = 0; j < json.features.length; j++)
                   {
                     
@@ -46,12 +51,16 @@ function loadCsv(doc, type, json) {
                   break;
                 
                 case 'pd':
-                  dat[i] = {edid: dat[i][1], pdid: dat[i][2], year: dat[i][3], variable : dat[i][4], party : dat[i][5], value : dat[i][6] };
+                  if(dat[i][1] == edToView)
+                  {
+                    dat[i] = {edid: dat[i][1], pdid: dat[i][2], year: dat[i][3], variable : dat[i][4], party : dat[i][5], value : dat[i][6] };
+                  }
+                  
                   break;
               }
             }
             
-           
+                // Get min and max vals for whole map
                 for(j = 0; j < json.features.length; j++)
                 {
                   maxVote = {variable: "", value: -Infinity}
@@ -142,9 +151,9 @@ function getColor(c, div, minVal, maxVal) {
     case 'WINNER':
       d = c.trim();
       
-      return d ==    "LIBERAL"                         ?   "#B0304B"  :
-              d ==    "PROGRESSIVE CONSERVATIVE"        ?   "#458BBE"  :
-              d ==    "NEW DEMOCRATIC"                  ?   "#D37F36"  :
+      return  d ==    "LIBERAL" || d == "ONTARIO LIBERAL PARTY"  ?   "#B0304B"  :
+              d ==    "PROGRESSIVE CONSERVATIVE" || d == "PROGRESSIVE CONSERVATIVE PARTY OF ONTARIO"       ?   "#458BBE"  :
+              d ==    "NEW DEMOCRATIC" || d == "NEW DEMOCRATIC PARTY OF ONTARIO"               ?   "#D37F36"  :
               d ==    "GREEN"                           ?   "#038543"  :
               d ==    "FAMILY COALITION PARTY OF ONTARIO"   ?   "#64C42B"  :
               d ==    "ONTARIO LIBERTARIAN PARTY"   ?   "#C96BD1"  :
@@ -183,14 +192,23 @@ function getColor(c, div, minVal, maxVal) {
 
 function onEachFeature(feature, layer) {
   
+  /*
   layer.bindPopup("<h5>" + feature.properties.ENGLISH_NA + " / "+feature.properties.FRENCH_NAM + "</h5>"
                   + "<b>Number of Electors in "+year+": </b>" +  feature.properties[year]["ELECTORS"]["value"]+"<br>"
                   + "<b>Voter Turnout in "+year+": </b>" + feature.properties[year]["VOTER_TURNOUT"]["value"] + " (" + Math.round(feature.properties[year]["VOTER_TURNOUT"]["value"]/feature.properties[year]["ELECTORS"]["value"]*100) + "%)<br>"
                   + "<b>Winning Party in "+year+": </b>" + feature.properties[year]["WINNER"]["party"]
                   )
+  */
     layer.on({
         mouseover: function(){layer.setStyle({fillOpacity: 0.9, weight:2})},
         mouseout: function(){layer.setStyle({fillOpacity: 0.6, weight:1})},
+        click: function()
+          {
+            console.dir(feature.properties)
+            chloropleth.clearLayers()
+            
+            
+          }
     });
 }
 
@@ -245,7 +263,15 @@ map.on('load', function() {
         loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
       }
     }
-    
+    document.getElementById('yearToggle').onclick = function()
+    {
+        console.log("Year changed to " + document.querySelector('input[name="year"]:checked').value)
+        chloropleth.clearLayers();
+        year = document.querySelector('input[name="year"]:checked').value;  
+        loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
+        
+    }
+    console.log(year)
     loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
     loadCsv()
 });
