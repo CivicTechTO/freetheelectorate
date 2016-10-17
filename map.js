@@ -64,6 +64,7 @@ function loadCsv(doc, type, json) {
                 for(j = 0; j < json.features.length; j++)
                 {
                   maxVote = {variable: "", value: -Infinity}
+                  //console.dir(json);
                   for(var k in json.features[j].properties[year])
                     {
 
@@ -74,7 +75,10 @@ function loadCsv(doc, type, json) {
                     }
                     json.features[j].properties[year]['WINNER'] = WINNER;
                     
-                    if(parseInt(json.features[j].properties[year][mapVariable].value)/parseInt(json.features[j].properties[year]['ELECTORS'].value) > maxVal)
+                    console.dir(json.features[j])
+                    if(json.features[j].properties[year][mapVariable] !== undefined)
+                    {
+                      if(parseInt(json.features[j].properties[year][mapVariable].value)/parseInt(json.features[j].properties[year]['ELECTORS'].value) > maxVal)
                     {
                       maxVal = parseInt(json.features[j].properties[year][mapVariable].value)/parseInt(json.features[j].properties[year]['ELECTORS'].value);
                     }
@@ -82,14 +86,19 @@ function loadCsv(doc, type, json) {
                     {
                       minVal = parseInt(json.features[j].properties[year][mapVariable].value)/parseInt(json.features[j].properties[year]['ELECTORS'].value);
                     }
+                    }
+                    
                 }
                     
-            console.dir(json);
+            
             
             chloropleth = L.geoJson(json,{style: style, onEachFeature: onEachFeature}).addTo(map)
             
             $("#sidebar").show(500)
             $("#sidebar-toggle").show(500)
+            $(".loader").fadeOut()
+            
+
             
         }
     };
@@ -98,7 +107,9 @@ function loadCsv(doc, type, json) {
 }
 
 function loadJson(doc, type, json) {
+    
     console.log(mapVariable)
+    console.log(year)
     var xhttp = new XMLHttpRequest();
     xhttp.onreadystatechange = function() {
         if (xhttp.readyState == 4 && xhttp.status == 200) 
@@ -192,20 +203,20 @@ function getColor(c, div, minVal, maxVal) {
 
 function onEachFeature(feature, layer) {
   
-  /*
+  
   layer.bindPopup("<h5>" + feature.properties.ENGLISH_NA + " / "+feature.properties.FRENCH_NAM + "</h5>"
                   + "<b>Number of Electors in "+year+": </b>" +  feature.properties[year]["ELECTORS"]["value"]+"<br>"
                   + "<b>Voter Turnout in "+year+": </b>" + feature.properties[year]["VOTER_TURNOUT"]["value"] + " (" + Math.round(feature.properties[year]["VOTER_TURNOUT"]["value"]/feature.properties[year]["ELECTORS"]["value"]*100) + "%)<br>"
                   + "<b>Winning Party in "+year+": </b>" + feature.properties[year]["WINNER"]["party"]
                   )
-  */
+  
     layer.on({
         mouseover: function(){layer.setStyle({fillOpacity: 0.9, weight:2})},
         mouseout: function(){layer.setStyle({fillOpacity: 0.6, weight:1})},
         click: function()
           {
             console.dir(feature.properties)
-            chloropleth.clearLayers()
+            //chloropleth.clearLayers()
             
             
           }
@@ -218,12 +229,12 @@ function onEachFeature(feature, layer) {
 // when map loads, 
 map.on('load', function() {
     map.setView([50,-90], 5)
-    
     document.getElementById("sidebar-toggle").onclick = function()
     {
       
       $("#sidebar").toggle(250)
       $("#sidebar-toggle").toggleClass("glyphicon-arrow-right glyphicon-arrow-le")
+      
     }
     document.getElementById("Turnout").onclick = function()
     {
@@ -247,6 +258,7 @@ map.on('load', function() {
         document.getElementById("legend-content").innerHTML = ""
         console.log(mapVariable)
         chloropleth.clearLayers()
+        $(".loader").fadeIn()
         loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
       }
       
@@ -256,6 +268,7 @@ map.on('load', function() {
       if(document.querySelector('input[name="Turnout"]:checked').value != null)
       {
         chloropleth.clearLayers()
+        $(".loader").fadeIn()
         mapVariable = document.querySelector('input[type="radio"]:checked').value;
         document.getElementById("legend-title").innerHTML = mapVariable;
         document.getElementById("legend-content").innerHTML = 'More<br><i style=" background-color:#800026"></i><br><br><i style="height:50px ;width:50px;border-color: black; border-width: 1px;border-style: solid; background-color:#FED976"></i><br>Less';
@@ -263,10 +276,11 @@ map.on('load', function() {
         loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
       }
     }
-    document.getElementById('yearToggle').onclick = function()
+    document.getElementById('yearToggle').onchange = function()
     {
         console.log("Year changed to " + document.querySelector('input[name="year"]:checked').value)
         chloropleth.clearLayers();
+        $(".loader").fadeIn()
         year = document.querySelector('input[name="year"]:checked').value;  
         loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
         
@@ -274,6 +288,7 @@ map.on('load', function() {
     console.log(year)
     loadJson('https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/edtotal.csv', 'ed', 'https://raw.githubusercontent.com/CivicTechTO/freetheelectorate/master/ED_ON_2014.geojson');
     loadCsv()
+
 });
 
 
