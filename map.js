@@ -229,6 +229,8 @@ function onEachFeature(feature, layer) {
 // when map loads, 
 map.on('load', function() {
     map.setView([50,-90], 5)
+    map.setMaxBounds([[68,-105],[38,-65]])
+
     document.getElementById("sidebar-toggle").onclick = function()
     {
       
